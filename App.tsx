@@ -93,23 +93,21 @@ const App: React.FC = () => {
       {/* Date Range Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-500" /> Time Period
+            <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+              <Clock className="w-4 h-4 text-accent-400" /> Time Window
             </h3>
         </div>
         <div className="space-y-2">
           {DATE_RANGES.map((option) => (
-            <label key={option.value} className="flex items-center group cursor-pointer">
+            <label key={option.value} className="flex items-center gap-3 rounded-xl border border-white/10 bg-edge/70 px-3 py-2 hover:border-accent-500/60 hover:bg-white/5 transition-colors cursor-pointer">
               <input
                 type="radio"
                 name="dateRange"
                 checked={dateRange === option.value}
                 onChange={() => setDateRange(option.value)}
-                className="h-4 w-4 text-medical-600 focus:ring-medical-600 border-gray-300"
+                className="h-4 w-4 text-accent-500 focus:ring-accent-500 bg-surface border-white/30 rounded"
               />
-              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                {option.label}
-              </span>
+              <span className="text-sm text-slate-100">{option.label}</span>
             </label>
           ))}
         </div>
@@ -118,22 +116,20 @@ const App: React.FC = () => {
       {/* Pub Type Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-gray-500" /> Study Type
+            <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-accent-400" /> Study Type
             </h3>
         </div>
         <div className="space-y-2">
           {ALL_PUBLICATION_TYPES.map((type) => (
-            <label key={type} className="flex items-center group cursor-pointer">
+            <label key={type} className="flex items-center gap-3 rounded-xl border border-white/10 bg-edge/70 px-3 py-2 hover:border-accent-500/60 hover:bg-white/5 transition-colors cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectedPubTypes.includes(type)}
                 onChange={() => togglePubType(type)}
-                className="h-4 w-4 text-medical-600 focus:ring-medical-600 border-gray-300 rounded transition-all"
+                className="h-4 w-4 text-accent-500 focus:ring-accent-500 bg-surface border-white/30 rounded transition-all"
               />
-              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                {type}
-              </span>
+              <span className="text-sm text-slate-100">{type}</span>
             </label>
           ))}
         </div>
@@ -142,69 +138,77 @@ const App: React.FC = () => {
       {/* Journal Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
-             <Filter className="w-4 h-4 text-gray-500" /> Journals
+           <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+             <Filter className="w-4 h-4 text-accent-400" /> Journals
            </h3>
            <button 
             onClick={toggleAllJournals}
-            className="text-xs text-medical-600 hover:text-medical-800 font-medium"
+            className="text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-accent-400 hover:border-accent-500/60 transition"
            >
              {selectedJournals.length === ALL_JOURNALS.length ? 'Clear' : 'All'}
            </button>
         </div>
         <div className="space-y-2">
           {Object.values(JournalName).map((journal) => (
-            <label key={journal} className="flex items-center group cursor-pointer">
+            <label key={journal} className="flex items-center gap-3 rounded-xl border border-white/10 bg-edge/70 px-3 py-2 hover:border-accent-500/60 hover:bg-white/5 transition-colors cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectedJournals.includes(journal)}
                 onChange={() => toggleJournal(journal)}
-                className="h-4 w-4 text-medical-600 focus:ring-medical-600 border-gray-300 rounded transition-all"
+                className="h-4 w-4 text-accent-500 focus:ring-accent-500 bg-surface border-white/30 rounded transition-all"
               />
-              <span className="ml-3 text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
-                {journal}
-              </span>
+              <span className="text-sm text-slate-100">{journal}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mt-4">
-        <h4 className="text-blue-900 font-semibold mb-2 text-sm">About ClinicalDaily</h4>
-        <p className="text-xs text-blue-800 leading-relaxed">
-          Aggregating the latest high-impact peer-reviewed studies. 
-          Use the <span className="font-bold">Summarize Trial</span> feature to get instant AI-powered breakdowns of complex clinical trials.
+      <div className="relative overflow-hidden rounded-2xl border border-accent-500/20 bg-gradient-to-br from-accent-500/10 via-white/5 to-medical-700/20 p-4 shadow-glow">
+        <div className="absolute -right-8 -top-8 h-28 w-28 bg-[radial-gradient(circle,rgba(93,243,255,0.26),transparent_55%)]" />
+        <h4 className="text-xs font-mono uppercase tracking-[0.2em] text-accent-300 mb-2">About</h4>
+        <p className="text-sm text-slate-100 leading-relaxed">
+          ClinicalDaily curates peer-reviewed findings with a surgical focus. 
+          Use <span className="font-semibold text-white">Summarize Trial</span> to generate precision synopses on-demand.
         </p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col font-sans">
+    <div className="min-h-screen flex flex-col font-sans text-slate-100 relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.04)_1px,transparent_0)] [background-size:72px_72px] opacity-20" />
+        <div className="absolute -top-24 right-0 w-80 h-80 bg-[radial-gradient(circle,rgba(93,243,255,0.25),transparent_55%)] blur-3xl" />
+        <div className="absolute -bottom-24 left-6 w-72 h-72 bg-[radial-gradient(circle,rgba(124,88,255,0.18),transparent_50%)] blur-3xl" />
+      </div>
+
       {/* Sticky Header */}
-      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm">
+      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-panel/80 backdrop-blur-xl shadow-[0_10px_60px_rgba(0,0,0,0.45)]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-accent-500/70 to-transparent" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="bg-medical-800 p-1.5 rounded-lg text-white">
-                <Stethoscope className="w-6 h-6" />
+            <div className="relative flex items-center gap-3">
+              <div className="relative h-11 w-11 rounded-2xl bg-gradient-to-br from-accent-500 to-medical-700 shadow-glow flex items-center justify-center overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.85),transparent_45%)] opacity-40" />
+                <Stethoscope className="w-5 h-5 text-surface" />
               </div>
-              <span className="text-xl font-serif font-bold text-gray-900 tracking-tight">
-                Clinical<span className="text-medical-600">Daily</span>
-              </span>
+              <div>
+                <span className="block text-xs font-mono uppercase tracking-[0.3em] text-accent-400">Clinical</span>
+                <span className="text-2xl font-semibold tracking-tight text-white">Daily</span>
+              </div>
             </div>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 max-w-lg mx-8 relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+            <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-accent-400" />
               </div>
               <input
                 type="text"
                 placeholder="Search titles, abstracts, or keywords..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-medical-600 focus:border-transparent sm:text-sm transition-all"
+                className="block w-full pl-11 pr-4 py-2.5 rounded-full bg-edge/80 border border-white/10 leading-5 text-slate-100 placeholder-slate-500 shadow-[0_12px_40px_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 sm:text-sm transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -212,29 +216,29 @@ const App: React.FC = () => {
 
             {/* Mobile Menu Button */}
             <button 
-              className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-md"
+              className="lg:hidden p-2 text-slate-200 border border-white/10 rounded-xl bg-white/5"
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
               {isSidebarOpen ? <X className="w-6 h-6"/> : <Menu className="w-6 h-6" />}
             </button>
 
             {/* Profile / Date Placeholder */}
-            <div className="hidden md:flex items-center text-sm text-gray-500">
-               {new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            <div className="hidden md:flex items-center text-xs font-mono text-slate-400 bg-white/5 border border-white/10 rounded-lg px-3 py-2 uppercase tracking-[0.14em]">
+               {new Date().toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
             </div>
           </div>
         </div>
         
         {/* Mobile Search Bar (only visible on mobile) */}
-        <div className="md:hidden px-4 pb-3 border-t border-gray-100 pt-3">
+        <div className="md:hidden px-4 pb-3 border-t border-white/10 pt-3 bg-panel/90 backdrop-blur-xl">
              <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 text-accent-400" />
               </div>
               <input
                 type="text"
                 placeholder="Search..."
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg bg-edge/80 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -242,23 +246,29 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <div className="flex flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 gap-8">
+      <div className="flex flex-1 w-full">
+        <div className="flex flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
+          <div className="relative w-full rounded-3xl border border-white/5 bg-white/5 backdrop-blur-xl shadow-[0_25px_80px_rgba(0,0,0,0.45)]">
+            <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-accent-500/50 to-transparent" />
+            <div className="flex flex-col lg:flex-row gap-10 p-6 sm:p-8">
         
         {/* Sidebar Filters - Desktop (Sticky) */}
-        <aside className="hidden md:block w-64 shrink-0">
-          <div className="sticky top-24">
+        <aside className="hidden lg:block w-72 shrink-0">
+          <div className="sticky top-24 rounded-2xl border border-white/10 bg-edge/70 backdrop-blur-xl p-6 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
             <SidebarContent />
           </div>
         </aside>
 
         {/* Mobile Sidebar (Overlay) */}
         {isSidebarOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-            <div className="fixed inset-0 bg-black/25 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
-            <div className="relative bg-white w-3/4 max-w-xs h-full shadow-xl p-6 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex lg:hidden">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
+            <div className="relative bg-panel/95 border border-white/10 w-3/4 max-w-xs h-full shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 overflow-y-auto">
                <div className="flex justify-between items-center mb-6">
-                 <h2 className="text-xl font-bold font-serif text-gray-900">Filters</h2>
-                 <button onClick={() => setIsSidebarOpen(false)}><X className="w-6 h-6 text-gray-500"/></button>
+                 <h2 className="text-xl font-semibold text-white">Filters</h2>
+                 <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg bg-white/5 border border-white/10">
+                   <X className="w-5 h-5 text-slate-300"/>
+                 </button>
                </div>
                <SidebarContent />
             </div>
@@ -266,38 +276,41 @@ const App: React.FC = () => {
         )}
 
         {/* Main Feed */}
-        <main className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-            <h1 className="text-2xl font-serif font-bold text-gray-900 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-medical-600" /> 
-              Latest Research
-            </h1>
+        <main className="flex-1 min-w-0 space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-xs font-mono uppercase tracking-[0.26em] text-accent-400">Live Feed</p>
+              <h1 className="text-3xl sm:text-4xl font-semibold text-white flex items-center gap-3">
+                <span className="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-accent-500/40">
+                  <BookOpen className="w-5 h-5 text-accent-400" /> 
+                </span>
+                Latest Research
+              </h1>
+            </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3 justify-end">
               <div className="relative">
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="appearance-none bg-white border border-gray-300 text-gray-700 py-1.5 pl-3 pr-8 rounded-lg text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-medical-600 focus:border-transparent cursor-pointer"
+                  className="appearance-none bg-edge/80 border border-white/10 text-slate-100 py-2 pl-4 pr-10 rounded-xl text-sm font-medium shadow-[0_10px_40px_rgba(0,0,0,0.45)] focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500 cursor-pointer"
                 >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
+                  <option className="bg-surface" value="newest">Newest First</option>
+                  <option className="bg-surface" value="oldest">Oldest First</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-accent-400">
                   <ArrowUpDown className="w-4 h-4" />
                 </div>
               </div>
 
-              <div className="hidden sm:block text-gray-300">|</div>
-
-              <span className="text-sm text-gray-500 bg-white px-3 py-1.5 rounded-full border border-gray-200 shadow-sm whitespace-nowrap">
+              <span className="text-xs font-mono uppercase tracking-[0.16em] text-slate-300 bg-white/5 px-3 py-2 rounded-full border border-white/10">
                 {processedArticles.length} Articles
               </span>
               
               <button 
                 onClick={handleFetchLive}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-1.5 bg-white text-medical-700 border border-medical-200 rounded-lg text-sm font-medium hover:bg-medical-50 hover:border-medical-300 transition-all disabled:opacity-70 shadow-sm whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-accent-500 to-medical-700 text-surface border border-accent-500/40 rounded-xl text-sm font-semibold hover:brightness-110 transition-all disabled:opacity-60 shadow-glow whitespace-nowrap"
               >
                 {isRefreshing ? (
                   <>
@@ -314,9 +327,9 @@ const App: React.FC = () => {
 
           <div className="space-y-6">
             {isRefreshing && articles.length === 0 ? (
-               <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-                  <Loader2 className="w-8 h-8 animate-spin mb-4 text-medical-600" />
-                  <p>Loading latest articles...</p>
+               <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-edge/60 border border-white/10 rounded-2xl">
+                  <Loader2 className="w-8 h-8 animate-spin mb-4 text-accent-400" />
+                  <p className="text-sm uppercase tracking-[0.2em] font-mono">Loading latest articles...</p>
                </div>
             ) : processedArticles.length > 0 ? (
               processedArticles.map(article => (
@@ -327,13 +340,13 @@ const App: React.FC = () => {
                 />
               ))
             ) : (
-              <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 mb-4">
-                   <Search className="w-6 h-6 text-gray-400" />
+              <div className="text-center py-16 bg-white/5 rounded-2xl border border-dashed border-white/15">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-edge/80 border border-white/10 mb-4">
+                   <Search className="w-6 h-6 text-accent-400" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">No articles found</h3>
-                <p className="text-gray-500 max-w-sm mx-auto mt-1">
-                  Try adjusting your search terms, date range, or filters from the sidebar.
+                <h3 className="text-lg font-semibold text-white">No articles found</h3>
+                <p className="text-slate-400 max-w-sm mx-auto mt-1">
+                  Adjust your search terms, time window, or toggle journals to broaden the feed.
                 </p>
                 <button 
                   onClick={() => {
@@ -342,7 +355,7 @@ const App: React.FC = () => {
                     setDateRange(30);
                     setSelectedPubTypes(ALL_PUBLICATION_TYPES);
                   }}
-                  className="mt-4 text-medical-600 hover:text-medical-800 font-medium text-sm"
+                  className="mt-5 inline-flex items-center gap-2 text-accent-400 hover:text-accent-500 font-semibold text-sm underline underline-offset-4"
                 >
                   Reset all filters
                 </button>
@@ -351,6 +364,9 @@ const App: React.FC = () => {
           </div>
         </main>
 
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

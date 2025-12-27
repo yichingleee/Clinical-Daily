@@ -5,23 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ClinicalDaily</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Merriweather', 'serif'],
+              sans: ['"Sora"', 'system-ui', 'sans-serif'],
+              display: ['"Sora"', 'system-ui', 'sans-serif'],
+              mono: ['"DM Mono"', 'monospace'],
             },
             colors: {
+              surface: '#05070f',
+              panel: '#0b1324',
+              edge: '#111a2f',
               medical: {
-                50: '#f0f9ff',
-                100: '#e0f2fe',
-                600: '#0284c7',
-                800: '#075985',
-                900: '#0c4a6e',
-              }
+                50: '#0b1728',
+                100: '#102036',
+                200: '#162c49',
+                300: '#1d375d',
+                400: '#245078',
+                500: '#1db6a1',
+                600: '#40f3c0',
+                700: '#5df3ff',
+              },
+              accent: {
+                300: '#7cf8df',
+                400: '#5df3ff',
+                500: '#3ee9d6',
+                600: '#26d7bf',
+                700: '#16b1b0',
+              },
+            },
+            boxShadow: {
+              glow: '0 0 0 1px rgba(93,243,255,0.35), 0 18px 55px rgba(4,10,20,0.55)',
             }
           }
         }
@@ -39,7 +56,16 @@
 }
 </script>
 </head>
-  <body class="bg-gray-50 text-slate-800 antialiased">
+  <body class="bg-surface text-slate-50 antialiased">
+    <style>
+      body {
+        background-image:
+          radial-gradient(circle at 18% 20%, rgba(93, 243, 255, 0.18), transparent 32%),
+          radial-gradient(circle at 82% 0%, rgba(124, 88, 255, 0.18), transparent 28%),
+          linear-gradient(180deg, rgba(14, 22, 40, 0.75), rgba(5, 7, 15, 0.98));
+      }
+    </style>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
