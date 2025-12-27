@@ -1,0 +1,5 @@
+{
+  "name": "ClinicalDaily",
+  "description": "A web-based medical research aggregator providing on-demand, AI-structured summaries for high-impact clinical trials.",
+  "requestFramePermissions": []
+}
