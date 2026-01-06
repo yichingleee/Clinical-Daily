@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ALL_JOURNALS, ALL_PUBLICATION_TYPES, DATE_RANGES } from './constants';
 import { Article, AISummary, JournalName, PublicationType, SortOption } from './types';
 import { ArticleCard } from './components/ArticleCard';
@@ -21,12 +21,21 @@ const App: React.FC = () => {
   // UI State
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const fetchAbortController = useRef<AbortController | null>(null);
+  const activeFetchId = useRef(0);
   
   // Initial Data Load & Refetch on Server-side filter changes
   useEffect(() => {
     handleFetchLive();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange, selectedPubTypes]); 
+  
+  useEffect(() => {
+    return () => {
+      fetchAbortController.current?.abort();
+    };
+  }, []);
 
   // Handlers
   const handleSummaryGenerated = (id: string, summary: AISummary) => {
@@ -34,14 +43,31 @@ const App: React.FC = () => {
   };
 
   const handleFetchLive = async () => {
+    const fetchId = activeFetchId.current + 1;
+    activeFetchId.current = fetchId;
     setIsRefreshing(true);
+    setFetchError(null);
+    fetchAbortController.current?.abort();
+    const controller = new AbortController();
+    fetchAbortController.current = controller;
     try {
-      const liveArticles = await fetchLatestArticles(dateRange, selectedPubTypes);
-      setArticles(liveArticles); // Even if empty, update state to clear old results
+      const liveArticles = await fetchLatestArticles(dateRange, selectedPubTypes, controller.signal);
+      if (fetchId === activeFetchId.current) {
+        setArticles(liveArticles); // Even if empty, update state to clear old results
+      }
     } catch (error) {
+      if ((error as Error).name === 'AbortError') return;
       console.error(error);
+      if (fetchId === activeFetchId.current) {
+        setFetchError('Unable to fetch latest articles. Please try again.');
+      }
     } finally {
-      setIsRefreshing(false);
+      if (fetchAbortController.current === controller) {
+        fetchAbortController.current = null;
+      }
+      if (fetchId === activeFetchId.current) {
+        setIsRefreshing(false);
+      }
     }
   };
 
@@ -326,6 +352,17 @@ const App: React.FC = () => {
           </div>
 
           <div className="space-y-6">
+            {fetchError && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                <span>{fetchError}</span>
+                <button
+                  onClick={handleFetchLive}
+                  className="text-xs font-mono uppercase tracking-[0.16em] text-red-100 border border-red-500/40 px-3 py-1 rounded-full hover:border-red-400/70 transition"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
             {isRefreshing && articles.length === 0 ? (
                <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-edge/60 border border-white/10 rounded-2xl">
                   <Loader2 className="w-8 h-8 animate-spin mb-4 text-accent-400" />

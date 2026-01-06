@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AISummary, Article, JournalName, PublicationType } from "../types";
 
-const apiKey = process.env.API_KEY || '';
+const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY || '';
 const ai = new GoogleGenAI({ apiKey });
 
 // --- Gemini Summarization (unchanged) ---
@@ -60,6 +60,54 @@ export const generateClinicalSummary = async (abstract: string): Promise<AISumma
 
 // --- PubMed API Integration ---
 
+const getRetryDelay = (attempt: number) => {
+  const baseDelay = 250 * Math.pow(2, attempt);
+  const jitter = Math.floor(Math.random() * 200);
+  return baseDelay + jitter;
+};
+
+const sleep = (ms: number, signal?: AbortSignal) => new Promise<void>((resolve, reject) => {
+  if (signal?.aborted) {
+    reject(new DOMException('Aborted', 'AbortError'));
+    return;
+  }
+
+  const onAbort = () => {
+    clearTimeout(timer);
+    signal?.removeEventListener('abort', onAbort);
+    reject(new DOMException('Aborted', 'AbortError'));
+  };
+
+  const timer = setTimeout(() => {
+    signal?.removeEventListener('abort', onAbort);
+    resolve();
+  }, ms);
+
+  signal?.addEventListener('abort', onAbort);
+});
+
+const fetchWithRetry = async (url: string, options: RequestInit = {}, retries: number = 2) => {
+  let attempt = 0;
+  while (true) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || response.status < 500 || attempt >= retries) {
+        return response;
+      }
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') {
+        throw error;
+      }
+      if (attempt >= retries) {
+        throw error;
+      }
+    }
+    const delay = getRetryDelay(attempt);
+    attempt += 1;
+    await sleep(delay, options.signal ?? undefined);
+  }
+};
+
 const JOURNAL_QUERY_MAP: Record<string, string> = {
   "NEJM": '"N Engl J Med"[Journal]',
   "JAMA": '"JAMA"[Journal]',
@@ -77,7 +125,11 @@ const PUB_TYPE_QUERY_MAP: Record<string, string> = {
   [PublicationType.SYSTEMATIC_REVIEW]: '"Systematic Review"[Publication Type]'
 };
 
-export const fetchLatestArticles = async (days: number = 14, pubTypes: string[] = []): Promise<Article[]> => {
+export const fetchLatestArticles = async (
+  days: number = 14,
+  pubTypes: string[] = [],
+  signal?: AbortSignal
+): Promise<Article[]> => {
   try {
     // 1. Construct Search Query
     const journalTerms = Object.values(JOURNAL_QUERY_MAP).join(' OR ');
@@ -96,7 +148,7 @@ export const fetchLatestArticles = async (days: number = 14, pubTypes: string[] 
     // ESearch: Find IDs (Increased retmax to 50 for broader filtering)
     const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(term)}&retmode=json&retmax=50&sort=date`;
     
-    const searchRes = await fetch(searchUrl);
+    const searchRes = await fetchWithRetry(searchUrl, { signal });
     if (!searchRes.ok) throw new Error("PubMed Search Failed");
     const searchData = await searchRes.json();
     const ids = searchData.esearchresult?.idlist;
@@ -107,7 +159,7 @@ export const fetchLatestArticles = async (days: number = 14, pubTypes: string[] 
 
     // 2. EFetch: Get Article Details
     const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${ids.join(',')}&retmode=xml`;
-    const fetchRes = await fetch(fetchUrl);
+    const fetchRes = await fetchWithRetry(fetchUrl, { signal });
     if (!fetchRes.ok) throw new Error("PubMed Fetch Failed");
     const xmlText = await fetchRes.text();
 
@@ -203,7 +255,10 @@ export const fetchLatestArticles = async (days: number = 14, pubTypes: string[] 
     return articles;
 
   } catch (error) {
+    if ((error as Error).name === 'AbortError') {
+      throw error;
+    }
     console.error("PubMed API Error:", error);
-    return [];
+    throw error;
   }
 };

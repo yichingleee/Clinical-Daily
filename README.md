@@ -36,7 +36,7 @@ Follow these steps to run ClinicalDaily on your computer. Don't worry if you're 
 
 ### Step 1: Check Prerequisites
 
-Before starting, make sure you have **Node.js** installed on your computer.
+Before starting, make sure you have **Node.js 20+** installed on your computer.
 
 **How to check if Node.js is installed:**
 
@@ -45,12 +45,12 @@ Before starting, make sure you have **Node.js** installed on your computer.
    ```
    node --version
    ```
-3. If you see a version number (like `v18.17.0`), you're good to go!
+3. If you see a version number (like `v20.0.0`), you're good to go!
 
 **If Node.js is NOT installed:**
 
 1. Go to [https://nodejs.org](https://nodejs.org)
-2. Download the **LTS** version (recommended for most users)
+2. Download the **LTS** version (Node 20+)
 3. Run the installer and follow the on-screen instructions
 4. Restart your terminal after installation
 
