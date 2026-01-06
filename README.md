@@ -1,12 +1,8 @@
 # ClinicalDaily
 
-<div align="center">
-<img width="1200" height="475" alt="ClinicalDaily Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-
 **Your AI-Powered Medical Research Assistant**
 
 Stay current with the latest clinical trials from top medical journals
-</div>
 
 ---
 
