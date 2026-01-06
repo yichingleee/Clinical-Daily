@@ -209,11 +209,9 @@ rmdir /s /q node_modules
 npm install
 ```
 
-### App won't start or port 3000 is busy
+### App starts on a different port
 
-Something else might be using port 3000. You can either:
-1. Close the other application using that port
-2. Or change the port in `vite.config.ts` (line 9) to another number like 3001
+If port 3000 is already in use, the app will automatically switch to the next available port (3001, 3002, etc.). Check your terminal output for the actual URL to use.
 
 ### "API Key is missing" error when summarizing
 
