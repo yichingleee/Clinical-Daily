@@ -1,17 +1,17 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ALL_JOURNALS, ALL_PUBLICATION_TYPES, DATE_RANGES } from './constants';
-import { Article, AISummary, JournalName, PublicationType, SortOption } from './types';
+import { Article, AISummary, PublicationType, SortOption } from './types';
 import { ArticleCard } from './components/ArticleCard';
 import { fetchLatestArticles } from './services/geminiService';
 import { Search, Filter, BookOpen, Stethoscope, Menu, X, RefreshCw, Loader2, ArrowUpDown, Clock, FlaskConical } from 'lucide-react';
 
-const App: React.FC = () => {
+const App = () => {
   // Data State
   const [articles, setArticles] = useState<Article[]>([]);
   
   // Filter State
   const [selectedJournals, setSelectedJournals] = useState<string[]>(ALL_JOURNALS);
-  const [selectedPubTypes, setSelectedPubTypes] = useState<string[]>(ALL_PUBLICATION_TYPES);
+  const [selectedPubTypes, setSelectedPubTypes] = useState<PublicationType[]>(ALL_PUBLICATION_TYPES);
   const [dateRange, setDateRange] = useState<number>(14); // Default 14 days
   
   // View State
@@ -23,53 +23,46 @@ const App: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const fetchAbortController = useRef<AbortController | null>(null);
-  const activeFetchId = useRef(0);
   
-  // Initial Data Load & Refetch on Server-side filter changes
-  useEffect(() => {
-    handleFetchLive();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dateRange, selectedPubTypes]); 
-  
-  useEffect(() => {
-    return () => {
-      fetchAbortController.current?.abort();
-    };
+  // Handlers
+  const handleSummaryGenerated = useCallback((id: string, summary: AISummary) => {
+    setArticles(prev => prev.map(a => a.id === id ? { ...a, cachedSummary: summary } : a));
   }, []);
 
-  // Handlers
-  const handleSummaryGenerated = (id: string, summary: AISummary) => {
-    setArticles(prev => prev.map(a => a.id === id ? { ...a, cachedSummary: summary } : a));
-  };
-
-  const handleFetchLive = async () => {
-    const fetchId = activeFetchId.current + 1;
-    activeFetchId.current = fetchId;
+  const handleFetchLive = useCallback(async () => {
     setIsRefreshing(true);
     setFetchError(null);
     fetchAbortController.current?.abort();
     const controller = new AbortController();
     fetchAbortController.current = controller;
+
     try {
       const liveArticles = await fetchLatestArticles(dateRange, selectedPubTypes, controller.signal);
-      if (fetchId === activeFetchId.current) {
+      if (fetchAbortController.current === controller) {
         setArticles(liveArticles); // Even if empty, update state to clear old results
       }
     } catch (error) {
       if ((error as Error).name === 'AbortError') return;
       console.error(error);
-      if (fetchId === activeFetchId.current) {
+      if (fetchAbortController.current === controller) {
         setFetchError('Unable to fetch latest articles. Please try again.');
       }
     } finally {
       if (fetchAbortController.current === controller) {
         fetchAbortController.current = null;
-      }
-      if (fetchId === activeFetchId.current) {
         setIsRefreshing(false);
       }
     }
-  };
+  }, [dateRange, selectedPubTypes]);
+
+  // Initial Data Load & Refetch on Server-side filter changes
+  useEffect(() => {
+    handleFetchLive();
+    return () => {
+      fetchAbortController.current?.abort();
+      fetchAbortController.current = null;
+    };
+  }, [handleFetchLive]);
 
   const toggleJournal = (journal: string) => {
     setSelectedJournals(prev => 
@@ -79,7 +72,7 @@ const App: React.FC = () => {
     );
   };
   
-  const togglePubType = (type: string) => {
+  const togglePubType = (type: PublicationType) => {
     // Note: Changing this triggers useEffect -> fetchLatestArticles
     setSelectedPubTypes(prev => 
       prev.includes(type)
@@ -93,15 +86,18 @@ const App: React.FC = () => {
   };
 
   // Filter & Sort Logic (Client Side)
+  const normalizedQuery = searchQuery.trim().toLowerCase();
   const processedArticles = useMemo(() => {
     // 1. Filter
-    let result = articles.filter(article => {
+    const result = articles.filter(article => {
       const matchesJournal = selectedJournals.includes(article.journal);
-      const matchesSearch = 
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.abstract.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      return matchesJournal && matchesSearch;
+      if (!matchesJournal) return false;
+      if (!normalizedQuery) return true;
+
+      return (
+        article.title.toLowerCase().includes(normalizedQuery) ||
+        article.abstract.toLowerCase().includes(normalizedQuery)
+      );
     });
 
     // 2. Sort
@@ -112,7 +108,7 @@ const App: React.FC = () => {
     });
 
     return result;
-  }, [articles, selectedJournals, searchQuery, sortBy]);
+  }, [articles, normalizedQuery, selectedJournals, sortBy]);
 
   const SidebarContent = () => (
     <div className="space-y-8">
@@ -175,7 +171,7 @@ const App: React.FC = () => {
            </button>
         </div>
         <div className="space-y-2">
-          {Object.values(JournalName).map((journal) => (
+          {ALL_JOURNALS.map((journal) => (
             <label key={journal} className="flex items-center gap-3 rounded-xl border border-white/10 bg-edge/70 px-3 py-2 hover:border-accent-500/60 hover:bg-white/5 transition-colors cursor-pointer">
               <input
                 type="checkbox"

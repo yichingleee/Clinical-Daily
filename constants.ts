@@ -1,4 +1,4 @@
-import { Article, JournalName, PublicationType } from './types';
+import { JournalName, PublicationType } from './types';
 
 export const ALL_JOURNALS = Object.values(JournalName);
 

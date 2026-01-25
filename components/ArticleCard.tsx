@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Article, AISummary } from '../types';
 import { generateClinicalSummary } from '../services/geminiService';
 import { ExternalLink, Calendar, Users, FlaskConical, FileText, CheckCircle2, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
@@ -8,7 +8,38 @@ interface ArticleCardProps {
   onSummaryGenerated: (id: string, summary: AISummary) => void;
 }
 
-export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onSummaryGenerated }) => {
+const renderAbstract = (text: string) => {
+  const sections = text.split('\n\n');
+  const isStructured = sections.length > 1;
+
+  // If it's a simple one-paragraph abstract, keep the quote style
+  if (!isStructured) {
+    return `"${text}"`;
+  }
+
+  // If structured, split into blocks and bold labels
+  return (
+    <div className="space-y-3 not-italic">
+      {sections.map((section, idx) => {
+        // Check for uppercase labels (e.g. "BACKGROUND: ...")
+        const match = section.match(/^([A-Z\s/-]+):/);
+        if (match) {
+          const label = match[1];
+          const content = section.substring(match[0].length);
+          return (
+            <div key={idx}>
+              <span className="font-bold text-[11px] text-accent-300 tracking-[0.14em] mr-2 uppercase">{label}:</span>
+              <span className="text-slate-200">{content}</span>
+            </div>
+          );
+        }
+        return <p key={idx}>{section}</p>;
+      })}
+    </div>
+  );
+};
+
+export const ArticleCard = ({ article, onSummaryGenerated }: ArticleCardProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,43 +51,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, onSummaryGene
     try {
       const summary = await generateClinicalSummary(article.abstract);
       onSummaryGenerated(article.id, summary);
-    } catch (err) {
-      setError("Failed to generate summary. Please try again.");
+    } catch {
+      setError('Failed to generate summary. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  // Helper to render abstract nicely
-  const renderAbstract = (text: string) => {
-    const sections = text.split('\n\n');
-    const isStructured = sections.length > 1;
-
-    // If it's a simple one-paragraph abstract, keep the quote style
-    if (!isStructured) {
-       return `"${text}"`;
-    }
-
-    // If structured, split into blocks and bold labels
-    return (
-      <div className="space-y-3 not-italic">
-        {sections.map((section, idx) => {
-          // Check for uppercase labels (e.g. "BACKGROUND: ...")
-          const match = section.match(/^([A-Z\s/-]+):/);
-          if (match) {
-            const label = match[1];
-            const content = section.substring(match[0].length);
-            return (
-              <div key={idx}>
-                <span className="font-bold text-[11px] text-accent-300 tracking-[0.14em] mr-2 uppercase">{label}:</span>
-                <span className="text-slate-200">{content}</span>
-              </div>
-            );
-          }
-          return <p key={idx}>{section}</p>;
-        })}
-      </div>
-    );
   };
 
   return (

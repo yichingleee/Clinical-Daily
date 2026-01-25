@@ -1,5 +1,7 @@
 # CLAUDE.md - ClinicalDaily Developer Guide for AI Assistants
 
+For repository-wide guidelines, commands, and testing expectations, refer to `AGENTS.md`.
+
 ## Project Overview
 
 **ClinicalDaily** is a web-based medical research aggregator that provides on-demand, AI-structured summaries for high-impact clinical trials. It fetches the latest peer-reviewed research from top medical journals (NEJM, JAMA, The Lancet, BMJ, Nature Medicine, Annals of Internal Medicine, and Journal of Clinical Oncology) via the PubMed API and uses Google's Gemini AI to generate structured clinical summaries.
@@ -214,6 +216,9 @@ GEMINI_API_KEY=<your-google-gemini-api-key>
 # Install dependencies
 npm install
 
+# Lint
+npm run lint
+
 # Set API key in .env.local
 echo "GEMINI_API_KEY=your_key_here" > .env.local
 
@@ -344,5 +349,5 @@ npm run preview
 
 ---
 
-**Last Updated**: 2026-01-06
+**Last Updated**: 2026-01-25
 **Codebase Version**: Based on commit `6754753` (feat: refresh futuristic clinical UI)

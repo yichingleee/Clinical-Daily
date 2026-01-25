@@ -10,8 +10,12 @@ The app is a Vite + React + TypeScript project with most source files at the rep
 - `npm run dev` starts the Vite dev server.
 - `npm run build` produces a production build in `dist/`.
 - `npm run preview` serves the production build locally for QA.
+- `npm run lint` runs ESLint across the repo.
 
-Local configuration uses `.env.local`. Set `GEMINI_API_KEY` before running the app.
+## Usage & Environment
+
+- Node.js >= 20 is required (see `package.json` engines).
+- Local configuration uses `.env.local`. Set `GEMINI_API_KEY` before running the app.
 
 ## Coding Style & Naming Conventions
 
@@ -19,7 +23,7 @@ Use the existing TypeScript + React style: 2-space indentation, single quotes, a
 
 ## Testing Guidelines
 
-No automated tests are configured yet. Validate changes by running `npm run dev` or `npm run preview` and manually exercising the UI flows (filters, search, refresh, and summaries). If you introduce tests later, add a script to `package.json` and colocate tests near their modules.
+No automated tests are configured yet. Validate changes by running `npm run lint`, then `npm run dev` or `npm run preview` and manually exercising the UI flows (filters, search, refresh, and summaries). If you introduce tests later, add a script to `package.json` and colocate tests near their modules.
 
 ## Commit & Pull Request Guidelines
 
