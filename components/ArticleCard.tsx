@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { Article, AISummary } from '../types';
 import { generateClinicalSummary } from '../services/geminiService';
-import { ExternalLink, Calendar, Users, FlaskConical, FileText, CheckCircle2, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+import { ExternalLink, Calendar, Users, FlaskConical, FileText, CheckCircle2, AlertTriangle, Sparkles, Loader2, Bookmark } from 'lucide-react';
+import { TagList } from './TagList';
 
 interface ArticleCardProps {
   article: Article;
   onSummaryGenerated: (id: string, summary: AISummary) => void;
+  onSave?: (article: Article) => void;
+  onUnsave?: (articleId: string) => void;
+  isSaved?: boolean;
+  showSaveButton?: boolean;
 }
 
 const renderAbstract = (text: string) => {
@@ -39,9 +44,17 @@ const renderAbstract = (text: string) => {
   );
 };
 
-export const ArticleCard = ({ article, onSummaryGenerated }: ArticleCardProps) => {
+export const ArticleCard = ({
+  article,
+  onSummaryGenerated,
+  onSave,
+  onUnsave,
+  isSaved = false,
+  showSaveButton = true,
+}: ArticleCardProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [savePending, setSavePending] = useState(false);
 
   const handleSummarize = async () => {
     if (article.cachedSummary) return; // Should already be displayed
@@ -58,6 +71,20 @@ export const ArticleCard = ({ article, onSummaryGenerated }: ArticleCardProps) =
     }
   };
 
+  const handleSaveToggle = async () => {
+    if (savePending) return;
+    setSavePending(true);
+    try {
+      if (isSaved && onUnsave) {
+        await onUnsave(article.pmid);
+      } else if (!isSaved && onSave) {
+        await onSave(article);
+      }
+    } finally {
+      setSavePending(false);
+    }
+  };
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.55)] mb-6 transition-all hover:-translate-y-1 hover:shadow-glow">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-accent-500/80 to-transparent" />
@@ -65,7 +92,7 @@ export const ArticleCard = ({ article, onSummaryGenerated }: ArticleCardProps) =
       <div className="p-6 sm:p-7">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
           <div className="flex-1">
-             <div className="flex items-center gap-2 mb-2">
+             <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-accent-500/10 text-accent-300 border border-accent-500/30 uppercase tracking-[0.16em]">
                   {article.journal}
                 </span>
@@ -74,7 +101,32 @@ export const ArticleCard = ({ article, onSummaryGenerated }: ArticleCardProps) =
                      <FlaskConical className="w-3 h-3 text-accent-400" /> Clinical Trial
                    </span>
                 )}
+                {showSaveButton && (onSave || onUnsave) && (
+                  <button
+                    onClick={handleSaveToggle}
+                    disabled={savePending}
+                    className={`
+                      ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold
+                      border transition-all
+                      ${isSaved
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30'
+                        : 'bg-white/5 text-slate-300 border-white/15 hover:border-accent-500/40 hover:text-accent-300'
+                      }
+                      ${savePending ? 'opacity-50 cursor-not-allowed' : ''}
+                    `}
+                    aria-label={isSaved ? 'Remove from library' : 'Save to library'}
+                  >
+                    <Bookmark className={`w-3 h-3 ${isSaved ? 'fill-current' : ''}`} />
+                    {isSaved ? 'Saved' : 'Save'}
+                  </button>
+                )}
              </div>
+             {/* Tags */}
+             {article.tags && article.tags.length > 0 && (
+               <div className="mb-2">
+                 <TagList tags={article.tags} maxVisible={5} />
+               </div>
+             )}
             <h2 className="text-xl md:text-2xl font-semibold text-white leading-tight mb-2">
               {article.title}
             </h2>
