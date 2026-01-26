@@ -8,7 +8,7 @@ import { LibraryPage } from './pages/LibraryPage';
 import { useAuth } from './contexts/AuthContext';
 import { fetchLatestArticles } from './services/geminiService';
 import { saveArticle, unsaveArticle, getSavedArticleIds } from './services/libraryService';
-import { Search, Filter, BookOpen, Stethoscope, Menu, X, RefreshCw, Loader2, ArrowUpDown, Clock, FlaskConical, Library } from 'lucide-react';
+import { Search, Filter, BookOpen, Stethoscope, Menu, X, RefreshCw, Loader2, ArrowUpDown, Clock, FlaskConical, Library, Sparkles } from 'lucide-react';
 
 type Page = 'feed' | 'library';
 
@@ -26,6 +26,7 @@ const AppContent = () => {
   const [selectedJournals, setSelectedJournals] = useState<string[]>(ALL_JOURNALS);
   const [selectedPubTypes, setSelectedPubTypes] = useState<PublicationType[]>(ALL_PUBLICATION_TYPES);
   const [dateRange, setDateRange] = useState<number>(14); // Default 14 days
+  const [enableAITags, setEnableAITags] = useState<boolean>(false); // AI tag generation toggle
 
   // View State
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,7 +92,7 @@ const AppContent = () => {
     fetchAbortController.current = controller;
 
     try {
-      const liveArticles = await fetchLatestArticles(dateRange, selectedPubTypes, controller.signal);
+      const liveArticles = await fetchLatestArticles(dateRange, selectedPubTypes, controller.signal, enableAITags);
       if (fetchAbortController.current === controller) {
         setArticles(liveArticles); // Even if empty, update state to clear old results
       }
@@ -107,7 +108,7 @@ const AppContent = () => {
         setIsRefreshing(false);
       }
     }
-  }, [dateRange, selectedPubTypes]);
+  }, [dateRange, selectedPubTypes, enableAITags]);
 
   // Initial Data Load & Refetch on Server-side filter changes
   useEffect(() => {
@@ -166,12 +167,40 @@ const AppContent = () => {
 
   const SidebarContent = () => (
     <div className="space-y-8">
+      {/* AI Tags Toggle Section */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-accent-400" /> AI Features
+          </h3>
+        </div>
+        <label className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-edge/70 px-3 py-3 hover:border-accent-500/60 hover:bg-white/5 transition-colors cursor-pointer">
+          <div className="flex flex-col">
+            <span className="text-sm text-slate-100">AI Tag Generation</span>
+            <span className="text-xs text-slate-400">Uses Gemini API</span>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={enableAITags}
+            onClick={() => setEnableAITags(!enableAITags)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 focus:ring-offset-surface ${enableAITags ? 'bg-accent-500' : 'bg-white/20'
+              }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform ${enableAITags ? 'translate-x-6' : 'translate-x-1'
+                }`}
+            />
+          </button>
+        </label>
+      </div>
+
       {/* Date Range Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
-              <Clock className="w-4 h-4 text-accent-400" /> Time Window
-            </h3>
+          <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+            <Clock className="w-4 h-4 text-accent-400" /> Time Window
+          </h3>
         </div>
         <div className="space-y-2">
           {DATE_RANGES.map((option) => (
@@ -192,9 +221,9 @@ const AppContent = () => {
       {/* Pub Type Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-accent-400" /> Study Type
-            </h3>
+          <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-accent-400" /> Study Type
+          </h3>
         </div>
         <div className="space-y-2">
           {ALL_PUBLICATION_TYPES.map((type) => (
@@ -214,15 +243,15 @@ const AppContent = () => {
       {/* Journal Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
-           <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
-             <Filter className="w-4 h-4 text-accent-400" /> Journals
-           </h3>
-           <button
+          <h3 className="text-xs font-mono font-medium text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+            <Filter className="w-4 h-4 text-accent-400" /> Journals
+          </h3>
+          <button
             onClick={toggleAllJournals}
             className="text-[11px] px-3 py-1 rounded-full bg-white/5 border border-white/10 text-accent-400 hover:border-accent-500/60 transition"
-           >
-             {selectedJournals.length === ALL_JOURNALS.length ? 'Clear' : 'All'}
-           </button>
+          >
+            {selectedJournals.length === ALL_JOURNALS.length ? 'Clear' : 'All'}
+          </button>
         </div>
         <div className="space-y-2">
           {ALL_JOURNALS.map((journal) => (
@@ -317,13 +346,13 @@ const AppContent = () => {
                   className="lg:hidden p-2 text-slate-200 border border-white/10 rounded-xl bg-white/5"
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                 >
-                  {isSidebarOpen ? <X className="w-6 h-6"/> : <Menu className="w-6 h-6" />}
+                  {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                 </button>
               )}
 
               {/* Date Display */}
               <div className="hidden md:flex items-center text-xs font-mono text-slate-400 bg-white/5 border border-white/10 rounded-lg px-3 py-2 uppercase tracking-[0.14em]">
-                 {new Date().toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
+                {new Date().toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}
               </div>
             </div>
           </div>
@@ -332,18 +361,18 @@ const AppContent = () => {
         {/* Mobile Search Bar (only visible on mobile when on feed) */}
         {currentPage === 'feed' && (
           <div className="md:hidden px-4 pb-3 border-t border-white/10 pt-3 bg-panel/90 backdrop-blur-xl">
-               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-4 w-4 text-accent-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg bg-edge/80 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-accent-400" />
               </div>
+              <input
+                type="text"
+                placeholder="Search..."
+                className="block w-full pl-10 pr-3 py-2 border border-white/10 rounded-lg bg-edge/80 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-accent-500"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
           </div>
         )}
       </header>
@@ -369,13 +398,13 @@ const AppContent = () => {
                     <div className="fixed inset-0 z-50 flex lg:hidden">
                       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
                       <div className="relative bg-panel/95 border border-white/10 w-3/4 max-w-xs h-full shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 overflow-y-auto">
-                         <div className="flex justify-between items-center mb-6">
-                           <h2 className="text-xl font-semibold text-white">Filters</h2>
-                           <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg bg-white/5 border border-white/10">
-                             <X className="w-5 h-5 text-slate-300"/>
-                           </button>
-                         </div>
-                         <SidebarContent />
+                        <div className="flex justify-between items-center mb-6">
+                          <h2 className="text-xl font-semibold text-white">Filters</h2>
+                          <button onClick={() => setIsSidebarOpen(false)} className="p-2 rounded-lg bg-white/5 border border-white/10">
+                            <X className="w-5 h-5 text-slate-300" />
+                          </button>
+                        </div>
+                        <SidebarContent />
                       </div>
                     </div>
                   )}
@@ -443,10 +472,10 @@ const AppContent = () => {
                         </div>
                       )}
                       {isRefreshing && articles.length === 0 ? (
-                         <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-edge/60 border border-white/10 rounded-2xl">
-                            <Loader2 className="w-8 h-8 animate-spin mb-4 text-accent-400" />
-                            <p className="text-sm uppercase tracking-[0.2em] font-mono">Loading latest articles...</p>
-                         </div>
+                        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-edge/60 border border-white/10 rounded-2xl">
+                          <Loader2 className="w-8 h-8 animate-spin mb-4 text-accent-400" />
+                          <p className="text-sm uppercase tracking-[0.2em] font-mono">Loading latest articles...</p>
+                        </div>
                       ) : processedArticles.length > 0 ? (
                         processedArticles.map(article => (
                           <ArticleCard
@@ -462,7 +491,7 @@ const AppContent = () => {
                       ) : (
                         <div className="text-center py-16 bg-white/5 rounded-2xl border border-dashed border-white/15">
                           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-edge/80 border border-white/10 mb-4">
-                             <Search className="w-6 h-6 text-accent-400" />
+                            <Search className="w-6 h-6 text-accent-400" />
                           </div>
                           <h3 className="text-lg font-semibold text-white">No articles found</h3>
                           <p className="text-slate-400 max-w-sm mx-auto mt-1">

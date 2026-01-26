@@ -355,7 +355,8 @@ const PUB_TYPE_QUERY_MAP: Record<PublicationType, string> = {
 export const fetchLatestArticles = async (
   days: number = 14,
   pubTypes: PublicationType[] = [],
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  enableAITags: boolean = false
 ): Promise<Article[]> => {
   try {
     // 1. Construct Search Query
@@ -510,25 +511,30 @@ export const fetchLatestArticles = async (
       };
     });
 
-    // Third pass: Generate AI tags in batches for articles that could use more context
+    // Third pass: Generate AI tags in batches (only if enabled)
     let aiTagResults: TagGenerationResult[] = [];
-    try {
-      // Process in batches to avoid overloading the AI
-      for (let i = 0; i < articlesWithMetadataTags.length; i += BATCH_SIZE) {
-        const batch = articlesWithMetadataTags.slice(i, i + BATCH_SIZE);
-        const batchInputs: TagGenerationInput[] = batch.map(a => ({
-          title: a.title,
-          abstract: a.abstract,
-          meshTerms: a.meshTerms,
-          publicationTypes: a.publicationTypes,
-        }));
+    if (enableAITags) {
+      try {
+        // Process in batches to avoid overloading the AI
+        for (let i = 0; i < articlesWithMetadataTags.length; i += BATCH_SIZE) {
+          const batch = articlesWithMetadataTags.slice(i, i + BATCH_SIZE);
+          const batchInputs: TagGenerationInput[] = batch.map(a => ({
+            title: a.title,
+            abstract: a.abstract,
+            meshTerms: a.meshTerms,
+            publicationTypes: a.publicationTypes,
+          }));
 
-        const batchResults = await generateArticleTags(batchInputs);
-        aiTagResults = aiTagResults.concat(batchResults);
+          const batchResults = await generateArticleTags(batchInputs);
+          aiTagResults = aiTagResults.concat(batchResults);
+        }
+      } catch (error) {
+        console.error('Error generating AI tags:', error);
+        // Fall back to empty AI tags
+        aiTagResults = parsedArticles.map(() => ({ typeTags: [], subspecialtyTags: [] }));
       }
-    } catch (error) {
-      console.error('Error generating AI tags:', error);
-      // Fall back to empty AI tags
+    } else {
+      // AI tagging disabled - use empty results
       aiTagResults = parsedArticles.map(() => ({ typeTags: [], subspecialtyTags: [] }));
     }
 
